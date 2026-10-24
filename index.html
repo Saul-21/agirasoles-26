@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Girasoles y Tulipanes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,600..900&family=Nunito:wght@400;600;800&display=swap">
+<style>
+  /* Concepto: una carta de amor en capas.
+     Clave con lluvia de girasoles y tulipanes, paginas enmarcadas por girasoles (amarillo)
+     o tulipanes (rosa), y un final de corazones blancos y rojos. Un solo look a proposito. */
+  :root {
+    --girasol: #FFC933;
+    --girasol-hondo: #F2A900;
+    --semilla: #4A2C12;
+    --crema: #FFF7DA;
+    --miel: #FFE79A;
+    --tulipan: #F26BA6;
+    --tulipan-hondo: #C9306F;
+    --petalo: #FFF3F8;
+    --tinta: #3A2312;
+    --tinta-rosa: #5A1535;
+    --rojo: #E3243F;
+    --rojo-hondo: #D01C38;
+    --hoja: #4C9A4F;
+    --f-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --f-cuerpo: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --f-mano: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #FFE79A;
+    color: var(--tinta);
+    font-family: var(--f-cuerpo);
+    overflow: hidden;
+  }
+  * { box-sizing: border-box; }
+
+  #app { position: relative; height: 100%; overflow: hidden; }
+
+  /* ---------- Pantallas ---------- */
+  .pantalla {
+    position: absolute; inset: 0; overflow: hidden;
+    animation: entrar .7s ease both;
+    --borde: var(--semilla);
+    --tarjeta: var(--crema);
+    --sombra: var(--girasol-hondo);
+    --btn-bg: var(--semilla);
+    --btn-fg: var(--miel);
+    --texto: var(--tinta);
+  }
+  .pantalla.saliendo { opacity: 0; transition: opacity .45s ease; pointer-events: none; }
+
+  .login, .amarillo {
+    background:
+      radial-gradient(circle at 50% 42%, #FFF9D6 0%, #FFE98A 62%, #FFD24A 100%);
+  }
+  .login {
+    background:
+      radial-gradient(circle at 50% 38%, #FFFBE3 0%, rgba(255,251,227,0) 55%),
+      linear-gradient(180deg, #FFE98A 0%, #FFD9B8 55%, #FFBFD9 100%);
+  }
+  .rosa {
+    --borde: var(--tinta-rosa);
+    --tarjeta: var(--petalo);
+    --sombra: var(--tulipan);
+    --btn-bg: var(--tulipan-hondo);
+    --btn-fg: #fff;
+    --texto: var(--tinta-rosa);
+    background:
+      radial-gradient(circle at 50% 30%, #FFF6FA 0%, rgba(255,246,250,0) 60%),
+      linear-gradient(180deg, #FFD3E6 0%, #FFB4D3 100%);
+  }
+
+  .decor, .lluvia, .corazones {
+    position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  }
+  .corazones { z-index: 5; }
+
+  .scroll {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex;
+    overflow-y: auto; overflow-x: hidden;
+    padding-block: clamp(64px, 13vh, 130px);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  /* ---------- Tarjeta ---------- */
+  .tarjeta {
+    margin: auto;
+    width: min(620px, 100%);
+    display: grid; justify-items: center; gap: 1.1rem;
+    padding: clamp(1.4rem, 5vw, 2.4rem) clamp(1.1rem, 5vw, 2.4rem) clamp(1.3rem, 4vw, 2rem);
+    background: var(--tarjeta);
+    color: var(--texto);
+    border: 3px solid var(--borde);
+    border-radius: 30px;
+    box-shadow: 7px 7px 0 var(--sombra);
+    min-width: 0;
+  }
+  .login-card {
+    background: rgba(255, 249, 226, .93);
+    width: min(440px, 100%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .eyebrow {
+    margin: 0;
+    font: 600 .8rem/1.2 var(--f-display);
+    letter-spacing: .22em;
+    text-transform: uppercase;
+  }
+  .titulo-pill {
+    margin: 0;
+    font: 800 clamp(1.4rem, 6vw, 2.3rem)/1.12 var(--f-display);
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    text-align: center;
+    text-wrap: balance;
+    border: 4px solid var(--borde);
+    border-radius: 52% 48% 50% 50% / 62% 58% 42% 38%;
+    padding: .62em 1.3em .68em;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .texto { display: grid; gap: .9rem; }
+  .texto p {
+    margin: 0;
+    max-width: 52ch;
+    text-align: center;
+    font: 600 clamp(1rem, 3.8vw, 1.14rem)/1.65 var(--f-cuerpo);
+    text-wrap: pretty;
+  }
+  .razones {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: .75rem;
+    counter-reset: n;
+    max-width: 52ch; width: 100%;
+  }
+  .razones li {
+    counter-increment: n;
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .7rem; align-items: baseline;
+    font: 700 clamp(1rem, 3.8vw, 1.1rem)/1.5 var(--f-cuerpo);
+  }
+  .razones li::before {
+    content: counter(n) ".";
+    font: 800 1.15em var(--f-display);
+    color: var(--rojo);
+    min-width: 1.6ch;
+  }
+
+  .pie { display: grid; justify-items: center; gap: 1rem; width: 100%; margin-top: .3rem; }
+  .puntos { display: flex; gap: .45rem; align-items: center; }
+  .puntos i {
+    display: block; width: 9px; height: 9px; border-radius: 99px;
+    background: var(--borde); opacity: .28;
+  }
+  .puntos i.on { width: 26px; opacity: 1; }
+
+  /* ---------- Botones ---------- */
+  .btn {
+    appearance: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: .6em;
+    min-height: 52px;
+    padding: .8em 2.3em;
+    border: 3px solid var(--borde);
+    border-radius: 999px;
+    background: var(--btn-bg); color: var(--btn-fg);
+    font: 800 1.05rem/1 var(--f-cuerpo);
+    letter-spacing: .05em;
+    box-shadow: 0 5px 0 var(--sombra);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--sombra); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--sombra); }
+  .btn:focus-visible, .enlace:focus-visible, .clave:focus-visible {
+    outline: 3px solid var(--rojo); outline-offset: 3px;
+  }
+  .btn svg { width: 1.1em; height: 1.1em; flex: none; }
+  .btn-fin {
+    --btn-bg: var(--rojo-hondo);
+    --btn-fg: #fff;
+    --sombra: #7E0F23;
+    border-color: #fff;
+    outline: 3px solid var(--rojo-hondo);
+    outline-offset: 0;
+    padding-inline: 2.8em;
+    font-size: 1.15rem;
+  }
+  .btn-fin:focus-visible { outline-color: var(--tinta); outline-offset: 3px; }
+  .btn-fin svg { animation: latir 1.2s ease-in-out infinite; fill: #fff; }
+
+  .enlace {
+    appearance: none; background: none; border: 0; cursor: pointer;
+    font: 700 .95rem var(--f-cuerpo); color: inherit;
+    text-decoration: underline; text-underline-offset: 4px;
+    padding: .5rem .8rem;
+  }
+  .despedida {
+    margin: 0;
+    font: 700 clamp(2.2rem, 10vw, 3.4rem)/1.1 var(--f-mano);
+    color: var(--rojo-hondo);
+    text-align: center;
+    animation: aparecer .9s ease both;
+  }
+
+  /* ---------- Clave ---------- */
+  .ayuda { margin: 0; text-align: center; font: 600 1.02rem/1.5 var(--f-cuerpo); }
+  .clave {
+    width: 100%; min-height: 58px;
+    border: 3px solid var(--semilla); border-radius: 18px;
+    background: #fff; color: var(--tinta);
+    text-align: center;
+    font: 700 1.7rem/1 var(--f-display);
+    letter-spacing: .14em;
+    padding: .5rem .75rem;
+  }
+  .clave::placeholder { color: #9C8466; letter-spacing: .08em; font-weight: 600; }
+  .clave[aria-invalid="true"] { border-color: var(--rojo); }
+  .error { margin: 0; min-height: 1.4em; text-align: center; font: 700 .95rem/1.4 var(--f-cuerpo); color: #B3122B; }
+  .shake { animation: sacudir .45s ease; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------- Flores ---------- */
+  .fl { position: absolute; left: var(--x); top: var(--y); width: calc(var(--k) * 1vmin); }
+  .fl svg { display: block; width: 100%; height: auto; }
+  .fl.abajo { top: auto; bottom: calc(var(--b, -2) * 1vmin); }
+  .fl.girasol { animation: giro var(--g, 70s) linear infinite; }
+  .fl.tulipan { transform-origin: 50% 100%; transform: rotate(var(--r, 0deg)); animation: mecer-t var(--g, 6s) ease-in-out infinite; }
+  .fl.cuelga { transform-origin: 50% 50%; transform: rotate(var(--r, 180deg)); animation: mecer-c var(--g, 7s) ease-in-out infinite; }
+
+  .cae {
+    position: absolute; top: 0; left: var(--x);
+    width: clamp(34px, calc(var(--k) * 1vmin), 88px);
+    animation: caer var(--t) linear var(--d) infinite;
+    will-change: transform;
+  }
+  .cae svg { display: block; width: 100%; height: auto; animation: mecer var(--m) ease-in-out var(--d) infinite; }
+
+  .cor {
+    position: absolute; top: 0; left: var(--x);
+    width: clamp(18px, calc(var(--k) * 1vmin), 46px);
+    animation: caer var(--t) linear var(--d) infinite;
+    filter: drop-shadow(0 2px 3px rgba(90, 0, 30, .3));
+  }
+  .cor svg { display: block; width: 100%; height: auto; animation: mecer var(--m) ease-in-out var(--d) infinite; }
+
+  .velo {
+    position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease;
+    background: radial-gradient(circle at 50% 30%, #F0507F 0%, #B3154F 68%, #7E0F3A 100%);
+  }
+  .final .velo { opacity: 1; }
+
+  /* ---------- Animaciones ---------- */
+  @keyframes entrar { from { opacity: 0; transform: scale(.98); } }
+  @keyframes aparecer { from { opacity: 0; transform: translateY(10px); } }
+  @keyframes caer { from { transform: translate3d(0, -22vh, 0); } to { transform: translate3d(0, 122vh, 0); } }
+  @keyframes mecer { 0%, 100% { transform: translateX(-14px) rotate(-16deg); } 50% { transform: translateX(14px) rotate(16deg); } }
+  @keyframes giro { to { transform: rotate(360deg); } }
+  @keyframes mecer-t { 0%, 100% { transform: rotate(calc(var(--r, 0deg) - 3deg)); } 50% { transform: rotate(calc(var(--r, 0deg) + 3deg)); } }
+  @keyframes mecer-c { 0%, 100% { transform: rotate(calc(var(--r, 180deg) - 5deg)); } 50% { transform: rotate(calc(var(--r, 180deg) + 5deg)); } }
+  @keyframes latir { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.28); } }
+  @keyframes sacudir { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pantalla, .despedida { animation: none; }
+    .fl.girasol, .fl.tulipan, .fl.cuelga, .cae svg, .cor svg, .btn-fin svg { animation: none; }
+    .cae, .cor { animation: none; transform: translateY(var(--y)); }
+    .btn, .velo { transition: none; }
+  }
+</style>
+</head>
+<body>
+<svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"></svg>
+
+<main id="app">
+  <section class="pantalla login activa" id="login">
+    <div class="lluvia" id="lluvia" aria-hidden="true"></div>
+    <div class="scroll">
+      <form class="tarjeta login-card" id="form-clave" autocomplete="off" novalidate>
+        <p class="eyebrow">Solo para ti</p>
+        <h1 class="titulo-pill">Nuestra clave</h1>
+        <p class="ayuda">Escribe la fecha que nos une.</p>
+        <label class="sr" for="clave">Clave secreta</label>
+        <input class="clave" id="clave" name="clave" type="text" inputmode="numeric" autocomplete="off"
+               placeholder="dd/mm/aa" maxlength="10" aria-describedby="error">
+        <p class="error" id="error" role="alert" aria-live="polite"></p>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =========================================================
+     LO QUE TU EDITAS
+     ========================================================= */
+
+  /* La clave: nuestra fecha 13/10/26. Se acepta con 2 o 4 digitos de ano. */
+  var CLAVES_VALIDAS = ['131026', '13102026'];
+
+  /* Mensaje que aparece al presionar "Fin". */
+  var MENSAJE_FINAL = 'Te amo, mi amor, mereces esto y más';
+
+  /* Cada elemento es una pagina.
+     tema: 'amarillo' (girasoles) o 'rosa' (tulipanes)
+     antetitulo: linea pequena arriba (opcional)
+     titulo: la pregunta o el titulo
+     texto: lista de parrafos (opcional)
+     items: lista numerada, por ejemplo razones (opcional)
+     Puedes agregar, quitar o cambiar el orden de las paginas.
+     El ultimo boton siempre dice "Fin". */
+  var PAGINAS = [
+    {
+      tema: 'amarillo',
+      antetitulo: 'Para ti mi pequeña bebé',
+      titulo: '¿Por qué te amo tanto?',
+      texto: [
+        'Porque poco a poco me dejas conocerte mas.',
+        'Porque me escuchas, siempre estas ahí para mi.',
+        'Porque se que eres autentica cuando estamos juntos.',
+        'Porque valoro mucho esos detalles que creeme cuando te digo que jamas lo habia recibido.',
+        'Porque ves en mi algo que yo no consigo ver.',
+        'Porque me encanta escuchar cuando te ries.',
+        'Porque al final siempre terminamos comprendiendonos.',
+        'Porque me permites conocer lo vulnerable que eres para cuidar mas esa parte de ti.',
+        'Porque la confianza que tenemos día a día crece más y más gordi.',
+        'Porque eres una excelente persona y no solo conmigo, siempre estas puesta a ayudar a los demas.',
+        'Porque indirectamente no lo sabes, pero me ayudas con mis demonios internos.',
+        'Porque esas imperfeciones que mencionas, tu no necesitas que sea una persona perfecta para encontrarme extraordinaria.',
+        'Porque quizas lo mas importante, tu inteligencia, siempre aprendo cosas nuevas de ti mientras estamos juntos amor.',
+        'Porque eres una persona muy sensible y eso me encanta, te conmueves con lo mas minimo gordi.',
+        'Porque auqnue no quieras admitirlo eres una persona fuerte, la forma en como enfrentaste a las pruebas de la vidda.',
+        'Porque simplemente existes, te amo mucho solo por vivir amor.',
+        'Porque tienes el mismo sentido de humor que yo jajajaj.',
+        'Porque podrías hablar durante horas y no cansarme de escucharte.',
+        'Porque eres lo suficiente celosa para mi aunque no te de motivos jajaj.',
+        'Porque siento que si tenemos una dirección en nuestra relación.',
+        'Porque recuerdas los pequeños detalles de mi.',
+        'Porque con solo una broma o un pequeño tono de voz diferente puedo saber que algo cambio y esa basta para entendernos.',
+        'Porque me demuestras tu amor de muchas maneras diferentes.',
+        'Porque genuinamente me haces sentir muy amado  aunque hay momentos donde te diga lo contrario, solo es de la boca para afuera gordi.',
+        'Porque estas ahí en mis días difíciles, yo no te digo nada, pero te amo simplemente por estar aqui conmigo.',
+        'Porque me imagino que algún día estaremos juntos.',
+        'Porque con el tiempo dejaras de sentir que solo me gustas o no se, sino que me volvere alguien que realmente sientas que se preocupa genuinamente por tu felicidad, por cuidarte, respetarte y elegirte sin necesidad de poseerte.',
+      ]
+    },
+    {
+      tema: 'amarillo',
+      titulo: 'Razones por las que te quiero en mi futuro',
+      items: [
+        'Porque quiero crecer a tu lado en todo sentido mi amor.',
+        'Porque deseo compartir tus logros, cada examen, partido, diplomas, etc.',
+        'Porque no solo quiero ser tu enamorado sino construir de la mano de Dios un hogar donde siempre haya paz y mucho amor.',
+        'Porque quiero acompañarte en esos días que no quieres hacer nada solo estar en paz sin hablar.',
+        'Porque quiero conocer todas tus versiones, saber quien fuiste ayer, quien eres hoy y quien serás mañana amor.',
+        'Porque confío en que llegará el día en que podamos resolver todos nuestros traumas, pero juntos.',
+        'Porque quiero ser parte de tu tranquilidad, deseo que en mi encuentres un espacio de confianza, respeto y estabilidad.',
+        'Porque quiero seguir eligiendote con el paso del tiempo.',
+      ]
+    },
+    {
+      tema: 'rosa',
+      titulo: 'Perdón',
+      texto: [
+        'Perdóname por todas las veces en las que pude haberte hecho sentir mal, por los momentos en los que mis palabras o mis acciones te hicieron sentir cosas que nunca quise hacerte sentir. Sé que no soy perfecto, que también cometo errores y que, aunque mis intenciones sean buenas, a veces puedo equivocarme y terminar lastimando a la persona que más quiero. No quiero justificar mis errores ni hacer como si nada hubiera pasado; simplemente quiero que sepas que, si en algún momento te hice daño, de corazón te pido perdón.',
+        'A pesar de todo lo que pueda pasar entre nosotros, de las dificultades, de los cambios o de las circunstancias que la vida nos ponga en el camino, quiero que sepas que el cariño que siento por ti es sincero. Siempre voy a desear verte bien, verte cumplir tus sueños y verte feliz. Y mientras la vida me lo permita, quiero seguir apoyándote, animándote cuando sientas que ya no puedes más y recordándote lo mucho que vales, incluso en esos días en los que tú misma llegues a olvidarlo.',
+        'No sé qué nos tenga preparado el futuro ni cómo vayan a terminar las cosas, porque hay muchas cosas que no dependen de nosotros. Pero sí sé lo que siento por ti y sé que, pase lo que pase, siempre voy a guardar un amor sincero por ti. No quiero prometerte una vida perfecta, porque no puedo asegurar que nunca volveré a equivocarme, pero sí quiero aprender, mejorar y ser una mejor persona cada día.',
+        'Perdóname por mis errores, por mis defectos y por todas las veces en las que no supe demostrarte de la manera correcta lo que siento por ti. Perdóname si alguna vez te hice dudar de tu valor, de mi cariño o de lo importante que eres para mí. Nunca quisiera ser una razón para que te sientas insuficiente, porque para mí eres una persona muy especial.',
+        'Y, al final, que sea lo que Dios quiera. Le pido a Dios que guíe nuestros caminos, que nos dé sabiduría para tomar las decisiones correctas y que, si está destinado que sigamos juntos, nos permita hacerlo de una manera bonita, sincera y sana. Y si la vida nos lleva por caminos diferentes, le pido que te cuide, que te dé felicidad y que nunca te falten motivos para sonreír.',
+        'Te amo de corazón, y más allá de lo que pueda pasar, siempre voy a desear lo mejor para ti. Perdóname por todo aquello en lo que pude fallarte. No soy perfecto, pero lo que siento por ti es real, y eso es algo que siempre voy a llevar conmigo.',
+      ]
+    },
+    {
+      tema: 'rosa',
+      titulo: 'Lo que quiero contigo',
+      texto: [
+        'Gordi, nos conocimos de noche en una partida de Free Fire y desde ese día no te pude soltar, gracias por permitirme estar ahí contigo. Yo sé que ese día no gané solo una partida, te gané a ti y nunca dejare de agraceder a ese juego que practicamente nos unio mi amor.',
+        'Quiero que esta historia que empezó en una pantalla la sigamos viviendo en la vida real, viajes, comidas, abrazos largos y muchas noches juntos, pero ahora sin lag jajajaj, a lo que voy es que quiero hacer de todo mientras estes tu ahí preciosa',
+        'Quiero que seamos equipo siempre preciosa. En los días buenos y en los difíciles, tú y yo contra todo, como en el juego, pero para toda la vida, hay limitaciones en esto pero créeme cuando te digo que me faltan muchas cosas por decirte, porque simplemente no me dan las palabras para expresarte todo lo que me haces sentir mi amor',
+      ]
+    }
+  ];
+
+  /* =========================================================
+     FLORES (dibujadas con codigo, sin imagenes)
+     ========================================================= */
+  function simboloGirasol() {
+    var atras = '', frente = '', semillas = '', i, a, r;
+    for (i = 0; i < 14; i++) {
+      a = i * 360 / 14;
+      atras += '<ellipse cx="50" cy="19" rx="8.5" ry="19" fill="#F2A900" transform="rotate(' + a + ' 50 50)"/>';
+    }
+    for (i = 0; i < 14; i++) {
+      a = (i + 0.5) * 360 / 14;
+      frente += '<ellipse cx="50" cy="21" rx="8" ry="17" fill="#FFC933" transform="rotate(' + a + ' 50 50)"/>';
+    }
+    for (i = 0; i < 26; i++) {
+      r = 2 + Math.sqrt(i) * 2.35;
+      a = i * 137.5 * Math.PI / 180;
+      semillas += '<circle cx="' + (50 + r * Math.cos(a)).toFixed(1) + '" cy="' + (50 + r * Math.sin(a)).toFixed(1) + '" r="1.3" fill="#2B1608"/>';
+    }
+    return '<symbol id="girasol" viewBox="0 0 100 100">' + atras + frente +
+      '<circle cx="50" cy="50" r="17" fill="#5A3416"/><circle cx="50" cy="50" r="13" fill="#6E4120"/>' + semillas + '</symbol>';
+  }
+
+  function simboloTulipan() {
+    return '<symbol id="tulipan" viewBox="0 0 100 140">' +
+      '<path d="M50 66 C49 96 51 118 50 140" stroke="#4C9A4F" stroke-width="4.5" fill="none" stroke-linecap="round"/>' +
+      '<path d="M50 140 C28 128 20 108 24 90 C38 100 48 118 50 140Z" fill="#5DAA5F"/>' +
+      '<path d="M50 140 C72 130 80 114 77 98 C64 106 52 120 50 140Z" fill="#4C9A4F"/>' +
+      '<path d="M50 70 C24 66 18 36 28 14 C40 22 48 40 50 70Z" fill="#F26BA6"/>' +
+      '<path d="M50 70 C76 66 82 36 72 14 C60 22 52 40 50 70Z" fill="#DB4A8C"/>' +
+      '<path d="M50 74 C34 56 34 30 50 8 C66 30 66 56 50 74Z" fill="#FF93C3"/>' +
+      '</symbol>';
+  }
+
+  document.getElementById('defs').innerHTML = simboloGirasol() + simboloTulipan();
+
+  var VB = { girasol: '0 0 100 100', tulipan: '0 0 100 140' };
+  function svgFlor(tipo) {
+    return '<svg viewBox="' + VB[tipo] + '"><use href="#' + tipo + '"/></svg>';
+  }
+
+  var HEART = 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z';
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ---------- Lluvia de la pantalla de clave ---------- */
+  function lluvia() {
+    var html = '', i, tipo, t, k;
+    for (i = 0; i < 30; i++) {
+      tipo = i % 2 ? 'tulipan' : 'girasol';
+      t = rnd(9, 18);
+      k = rnd(6, 13);
+      html += '<span class="cae" style="--x:' + rnd(0, 94).toFixed(1) + '%;--k:' + k.toFixed(1) +
+        ';--t:' + t.toFixed(1) + 's;--d:' + (-rnd(0, t)).toFixed(1) + 's;--m:' + rnd(3, 6).toFixed(1) +
+        's;--y:' + rnd(0, 100).toFixed(0) + 'vh">' + svgFlor(tipo) + '</span>';
+    }
+    document.getElementById('lluvia').innerHTML = html;
+  }
+
+  /* ---------- Marcos de cada tema ---------- */
+  function decorGirasoles() {
+    /* x%, y%, tamano (vmin), giro en segundos (negativo = sentido contrario) */
+    var L = [
+      [-5, -6, 40, 80], [84, -5, 34, -70], [44, -8, 19, 55], [66, -3, 15, -60], [18, -4, 15, 65],
+      [-7, 44, 26, -75], [91, 39, 24, 72], [-4, 80, 38, 68], [89, 79, 36, -64],
+      [40, 91, 21, -58], [62, 94, 17, 62], [18, 91, 16, -66]
+    ];
+    return L.map(function (f) {
+      return '<span class="fl girasol" style="--x:' + f[0] + '%;--y:' + f[1] + '%;--k:' + f[2] +
+        ';--g:' + Math.abs(f[3]) + 's;animation-direction:' + (f[3] < 0 ? 'reverse' : 'normal') + '">' + svgFlor('girasol') + '</span>';
+    }).join('');
+  }
+
+  function decorTulipanes() {
+    var h = '<div class="velo"></div>', i, k, r, x;
+    for (i = 0; i < 13; i++) {
+      x = -3 + i * 8.4;
+      k = 12 + 8 * Math.abs(Math.sin(i * 1.7));
+      r = 7 * Math.sin(i * 2.3);
+      h += '<span class="fl tulipan abajo" style="--x:' + x.toFixed(1) + '%;--k:' + k.toFixed(1) +
+        ';--r:' + r.toFixed(1) + 'deg;--b:-1.5;--g:' + (5 + (i % 4)) + 's">' + svgFlor('tulipan') + '</span>';
+    }
+    [[1, 12], [7, 10], [13, 11], [86, 11], [92, 12], [98, 10]].forEach(function (f, j) {
+      h += '<span class="fl cuelga" style="--x:' + f[0] + '%;--y:-2vmin;--k:' + f[1] +
+        ';--r:' + (180 + (j % 2 ? -10 : 10)) + 'deg;--g:' + (6 + j) + 's">' + svgFlor('tulipan') + '</span>';
+    });
+    return h;
+  }
+
+  /* ---------- Paginas ---------- */
+  function crearPantalla(i) {
+    var p = PAGINAS[i], total = PAGINAS.length, ultima = i === total - 1;
+    var texto = '', lista = '', puntos = '', j;
+    if (p.texto && p.texto.length) {
+      texto = '<div class="texto">' + p.texto.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    }
+    if (p.items && p.items.length) {
+      lista = '<ol class="razones">' + p.items.map(function (t) { return '<li><span>' + esc(t) + '</span></li>'; }).join('') + '</ol>';
+    }
+    for (j = 0; j < total; j++) puntos += '<i' + (j === i ? ' class="on"' : '') + '></i>';
+
+    var boton = ultima
+      ? '<button class="btn btn-fin" id="siguiente" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + HEART + '"/></svg>Fin</button>'
+      : '<button class="btn" id="siguiente" type="button">Siguiente<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+
+    var s = document.createElement('section');
+    s.className = 'pantalla ' + (p.tema === 'rosa' ? 'rosa' : 'amarillo');
+    s.innerHTML =
+      '<div class="decor" aria-hidden="true">' + (p.tema === 'rosa' ? decorTulipanes() : decorGirasoles()) + '</div>' +
+      '<div class="scroll"><article class="tarjeta">' +
+        (p.antetitulo ? '<p class="eyebrow">' + esc(p.antetitulo) + '</p>' : '') +
+        '<h2 class="titulo-pill">' + esc(p.titulo) + '</h2>' +
+        texto + lista +
+        '<div class="pie">' +
+          '<div class="puntos" role="img" aria-label="Página ' + (i + 1) + ' de ' + total + '">' + puntos + '</div>' +
+          boton +
+        '</div>' +
+      '</article></div>';
+
+    s.querySelector('#siguiente').addEventListener('click', function () {
+      if (ultima) terminar(s); else ir(i + 1);
+    });
+    return s;
+  }
+
+  function ir(i) {
+    var app = document.getElementById('app');
+    var vieja = app.querySelector('.pantalla.activa');
+    var nueva = crearPantalla(i);
+    nueva.classList.add('activa');
+    app.appendChild(nueva);
+    if (vieja) {
+      vieja.classList.remove('activa');
+      vieja.classList.add('saliendo');
+      setTimeout(function () { vieja.remove(); }, 520);
+    }
+    var b = nueva.querySelector('#siguiente');
+    if (b) b.focus({ preventScroll: true });
+  }
+
+  /* ---------- Final: corazones blancos y rojos ---------- */
+  function terminar(pant) {
+    pant.classList.add('final');
+    var capa = document.createElement('div');
+    capa.className = 'corazones';
+    capa.setAttribute('aria-hidden', 'true');
+    var h = '', i, t, blanco;
+    for (i = 0; i < 64; i++) {
+      t = rnd(6, 12);
+      blanco = i % 2 === 0;
+      h += '<span class="cor" style="--x:' + rnd(0, 96).toFixed(1) + '%;--k:' + rnd(4, 9).toFixed(1) +
+        ';--t:' + t.toFixed(1) + 's;--d:' + rnd(0, 6).toFixed(1) + 's;--m:' + rnd(3, 6).toFixed(1) +
+        's;--y:' + rnd(0, 100).toFixed(0) + 'vh"><svg viewBox="0 0 24 24"><path d="' + HEART + '" fill="' +
+        (blanco ? '#FFFFFF' : '#E3243F') + '"' + (blanco ? ' stroke="rgba(227,36,63,.45)" stroke-width="0.8"' : '') + '/></svg></span>';
+    }
+    capa.innerHTML = h;
+    pant.appendChild(capa);
+
+    var pie = pant.querySelector('.pie');
+    pie.innerHTML = '<p class="despedida">' + esc(MENSAJE_FINAL) + '</p>' +
+      '<button class="enlace" id="reiniciar" type="button">Volver a leer</button>';
+    pie.querySelector('#reiniciar').addEventListener('click', function () { ir(0); });
+  }
+
+  /* ---------- Clave ---------- */
+  var form = document.getElementById('form-clave');
+  var inp = document.getElementById('clave');
+  var err = document.getElementById('error');
+
+  inp.addEventListener('input', function () {
+    var d = inp.value.replace(/\D/g, '').slice(0, 8), s = d;
+    if (d.length > 4) s = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4);
+    else if (d.length > 2) s = d.slice(0, 2) + '/' + d.slice(2);
+    inp.value = s;
+    if (err.textContent) { err.textContent = ''; inp.removeAttribute('aria-invalid'); }
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var d = inp.value.replace(/\D/g, '');
+    if (CLAVES_VALIDAS.indexOf(d) !== -1) {
+      ir(0);
+    } else {
+      err.textContent = 'Esa no es la clave. Piensa en nuestra fecha.';
+      inp.setAttribute('aria-invalid', 'true');
+      form.classList.remove('shake');
+      void form.offsetWidth;
+      form.classList.add('shake');
+      inp.focus();
+    }
+  });
+
+  lluvia();
+  inp.focus({ preventScroll: true });
+})();
+</script>
+
+</body>
+</html>
